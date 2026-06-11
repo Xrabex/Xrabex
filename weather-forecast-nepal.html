@@ -1,0 +1,2276 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#1a2744">
+
+<!-- ══ SEO META — dynamically updated per city page ══ -->
+<title id="pageTitle">Kathmandu Weather Forecast Today — Weather Forecast Nepal</title>
+<meta name="description" id="pageDesc"
+  content="Accurate Kathmandu weather forecast, hourly weather, rain probability, temperature and air quality. Updated every hour.">
+<meta name="keywords" content="Kathmandu weather, Nepal weather forecast, weather today Nepal, मौसम पूर्वानुमान">
+<link rel="canonical" id="canonicalLink" href="https://weatherforecastnepal.com/weather/kathmandu">
+
+<!-- Open Graph -->
+<meta property="og:title" id="ogTitle" content="Kathmandu Weather Forecast — Weather Forecast Nepal">
+<meta property="og:description" id="ogDesc" content="Accurate Kathmandu weather forecast with hourly updates, rain probability, and air quality index.">
+<meta property="og:type" content="website">
+<meta property="og:url" id="ogUrl" content="https://weatherforecastnepal.com/weather/kathmandu">
+<meta property="og:image" content="https://weatherforecastnepal.com/og-kathmandu.jpg">
+<meta name="twitter:card" content="summary_large_image">
+
+<!-- Structured Data (JSON-LD) -->
+<script type="application/ld+json" id="structuredData">
+{
+  "@context": "https://schema.org",
+  "@type": "WebPage",
+  "name": "Kathmandu Weather Forecast Today",
+  "description": "Accurate Kathmandu weather forecast, hourly weather, rain probability, temperature and air quality.",
+  "url": "https://weatherforecastnepal.com/weather/kathmandu",
+  "breadcrumb": {
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      {"@type": "ListItem","position": 1,"name": "Home","item": "https://weatherforecastnepal.com"},
+      {"@type": "ListItem","position": 2,"name": "Weather","item": "https://weatherforecastnepal.com/weather"},
+      {"@type": "ListItem","position": 3,"name": "Kathmandu","item": "https://weatherforecastnepal.com/weather/kathmandu"}
+    ]
+  }
+}
+</script>
+
+<!-- Fonts -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet">
+
+<!-- Lucide Icons -->
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+
+<style>
+/* ============================================================
+   WEATHER FORECAST NEPAL — Design System
+   Philosophy: Editorial · Atmospheric · Restrained
+   Palette:
+     --ink:        #0f1923  (deep navy-black, primary text)
+     --sky:        #1a2744  (midnight sky — primary brand)
+     --accent:     #4a90d9  (clear-sky blue — single accent)
+     --cloud:      #e8edf5  (pale cloud — light surfaces)
+     --mist:       rgba(255,255,255,0.07)  (glass fill)
+   ============================================================ */
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  /* Core palette — intentionally minimal */
+  --ink:        #0f1923;
+  --sky:        #1a2744;
+  --sky-mid:    #243660;
+  --accent:     #4a90d9;
+  --accent-dim: rgba(74,144,217,0.15);
+  --cloud-pale: rgba(255,255,255,0.06);
+  --cloud-mid:  rgba(255,255,255,0.11);
+  --cloud-edge: rgba(255,255,255,0.18);
+  --text-1:     rgba(255,255,255,0.95);
+  --text-2:     rgba(255,255,255,0.62);
+  --text-3:     rgba(255,255,255,0.38);
+  --divider:    rgba(255,255,255,0.08);
+
+  /* Glass cards — subtle, not ostentatious */
+  --glass-bg:     rgba(255,255,255,0.06);
+  --glass-border: rgba(255,255,255,0.12);
+  --glass-blur:   blur(14px);
+  --shadow-card:  0 4px 24px rgba(0,0,0,0.28);
+  --shadow-hover: 0 8px 32px rgba(0,0,0,0.36);
+
+  /* Radii */
+  --r-lg: 20px;
+  --r-md: 14px;
+  --r-sm: 10px;
+
+  /* Typography */
+  --font-serif: 'DM Serif Display', Georgia, serif;
+  --font-sans:  'DM Sans', system-ui, sans-serif;
+
+  /* Atmospheric gradient — changes with weather */
+  --atm-a: #1a2744;
+  --atm-b: #0f1923;
+}
+
+html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
+
+body {
+  font-family: var(--font-sans);
+  background: linear-gradient(160deg, var(--atm-a) 0%, var(--atm-b) 100%);
+  min-height: 100vh;
+  color: var(--text-1);
+  overflow-x: hidden;
+  transition: background 2.4s ease;
+}
+
+/* Weather atmosphere themes — restrained gradients */
+body.wx-clear   { --atm-a:#1c3a5e; --atm-b:#0d1e35; }
+body.wx-cloudy  { --atm-a:#232b3e; --atm-b:#141922; }
+body.wx-rain    { --atm-a:#162032; --atm-b:#0a1018; }
+body.wx-storm   { --atm-a:#100c1e; --atm-b:#080610; }
+body.wx-snow    { --atm-a:#1e2d44; --atm-b:#0e1828; }
+body.wx-fog     { --atm-a:#1e2535; --atm-b:#141a22; }
+body.wx-night   { --atm-a:#0d1424; --atm-b:#060810; }
+
+/* ── AMBIENT CLOUD LAYER ── */
+.sky-canvas {
+  position: fixed; inset: 0; pointer-events: none;
+  overflow: hidden; z-index: 0; opacity: 0.4;
+}
+.cloud-band {
+  position: absolute;
+  width: 200%; height: 100%;
+  animation: cloudDrift linear infinite;
+}
+.cloud-band-1 { animation-duration: 120s; top: 0; }
+.cloud-band-2 { animation-duration: 180s; top: 10%; animation-direction: reverse; }
+@keyframes cloudDrift {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+.cloud-shape {
+  position: absolute;
+  fill: rgba(255,255,255,0.04);
+}
+
+/* Rain particles */
+.rain-wrap { position: fixed; inset: 0; pointer-events: none; z-index: 1; display:none; }
+body.wx-rain  .rain-wrap,
+body.wx-storm .rain-wrap { display:block; }
+.raindrop {
+  position: absolute; top: -20px;
+  width: 1px;
+  background: linear-gradient(transparent, rgba(180,210,240,0.55));
+  border-radius: 0 0 1px 1px;
+  animation: rainFall linear infinite;
+}
+@keyframes rainFall { to { transform: translateY(110vh); } }
+
+/* ── APP SHELL ── */
+.shell {
+  position: relative; z-index: 2;
+  max-width: 1160px;
+  margin: 0 auto;
+  padding: 0 18px 100px;
+}
+
+/* ── NAVIGATION ── */
+.nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 0 16px;
+  gap: 12px;
+}
+.brand {
+  font-family: var(--font-sans);
+  font-size: 1.1rem;
+  font-weight: 700;
+  letter-spacing: -0.3px;
+  color: var(--text-1);
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.brand-mark {
+  width: 32px; height: 32px;
+  background: var(--accent-dim);
+  border: 1px solid rgba(74,144,217,0.3);
+  border-radius: 9px;
+  display: flex; align-items: center; justify-content: center;
+  color: var(--accent);
+}
+.brand-name {
+  display: flex; flex-direction: column; gap: 0;
+}
+.brand-name span:first-child {
+  line-height: 1.1;
+  font-size: 0.95rem;
+}
+.brand-name span:last-child {
+  font-size: 0.65rem;
+  opacity: 0.55;
+  font-weight: 400;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+.nav-links {
+  display: flex; align-items: center; gap: 2px;
+  list-style: none;
+}
+.nav-links a {
+  color: var(--text-2);
+  text-decoration: none;
+  font-size: 0.86rem;
+  font-weight: 500;
+  padding: 6px 14px;
+  border-radius: 30px;
+  transition: background 0.18s, color 0.18s;
+  display: flex; align-items: center; gap: 6px;
+}
+.nav-links a:hover,
+.nav-links a.active {
+  background: var(--cloud-mid);
+  color: var(--text-1);
+}
+.nav-hamburger {
+  display: none;
+  flex-direction: column; gap: 5px;
+  cursor: pointer; padding: 9px;
+  border-radius: var(--r-sm);
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  transition: background 0.18s;
+}
+.nav-hamburger span {
+  display: block; height: 1.5px;
+  background: var(--text-1); border-radius: 2px;
+  transition: all 0.28s ease;
+}
+.nav-hamburger span:nth-child(1) { width: 20px; }
+.nav-hamburger span:nth-child(2) { width: 14px; }
+.nav-hamburger span:nth-child(3) { width: 18px; }
+.nav-hamburger.open span:nth-child(1) { transform: rotate(45deg) translate(4.7px,4.7px); width: 20px; }
+.nav-hamburger.open span:nth-child(2) { opacity: 0; }
+.nav-hamburger.open span:nth-child(3) { transform: rotate(-45deg) translate(4.7px,-4.7px); width: 20px; }
+
+/* Mobile drawer */
+.mobile-drawer {
+  display: none;
+  position: fixed; inset: 0;
+  background: rgba(10,16,28,0.88);
+  backdrop-filter: blur(28px);
+  z-index: 999;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+.mobile-drawer.open { display: flex; }
+.mobile-drawer a {
+  color: var(--text-1); text-decoration: none;
+  font-size: 1.8rem; font-weight: 600;
+  padding: 10px 44px; border-radius: var(--r-md);
+  opacity: 0; transform: translateY(18px);
+  animation: slideIn 0.36s forwards;
+  transition: background 0.18s;
+}
+.mobile-drawer a:hover { background: var(--cloud-mid); }
+.mobile-drawer a:nth-child(1) { animation-delay: .04s; }
+.mobile-drawer a:nth-child(2) { animation-delay: .08s; }
+.mobile-drawer a:nth-child(3) { animation-delay: .12s; }
+.mobile-drawer a:nth-child(4) { animation-delay: .16s; }
+.mobile-drawer a:nth-child(5) { animation-delay: .20s; }
+.mobile-drawer a:nth-child(6) { animation-delay: .24s; }
+.drawer-close {
+  position: absolute; top: 22px; right: 22px;
+  background: var(--glass-bg); border: 1px solid var(--glass-border);
+  color: var(--text-1); width: 40px; height: 40px;
+  border-radius: 50%; font-size: 1.1rem;
+  cursor: pointer; display: flex; align-items: center; justify-content: center;
+}
+@keyframes slideIn { to { opacity: 1; transform: translateY(0); } }
+
+/* ── BREADCRUMB (SEO) ── */
+.breadcrumb {
+  display: flex; align-items: center; gap: 6px;
+  font-size: 0.75rem; color: var(--text-3);
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+.breadcrumb a {
+  color: var(--text-3); text-decoration: none;
+  transition: color 0.15s;
+}
+.breadcrumb a:hover { color: var(--accent); }
+.breadcrumb-sep { opacity: 0.4; }
+.breadcrumb .current { color: var(--text-2); }
+
+/* ── SEARCH ── */
+.search-zone {
+  position: relative;
+  max-width: 500px;
+  margin: 0 auto 24px;
+}
+.search-input {
+  width: 100%;
+  padding: 13px 50px 13px 44px;
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: 40px;
+  color: var(--text-1);
+  font-family: var(--font-sans);
+  font-size: 0.92rem;
+  outline: none;
+  backdrop-filter: var(--glass-blur);
+  transition: border 0.2s, box-shadow 0.2s;
+}
+.search-input::placeholder { color: var(--text-3); }
+.search-input:focus {
+  border-color: rgba(74,144,217,0.45);
+  box-shadow: 0 0 0 3px rgba(74,144,217,0.1);
+}
+.search-icon {
+  position: absolute; left: 15px; top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-3);
+  pointer-events: none;
+}
+.search-go {
+  position: absolute; right: 6px; top: 50%;
+  transform: translateY(-50%);
+  background: var(--accent-dim);
+  border: 1px solid rgba(74,144,217,0.25);
+  color: var(--accent); width: 36px; height: 36px;
+  border-radius: 50%; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: background 0.18s;
+}
+.search-go:hover { background: rgba(74,144,217,0.28); }
+.search-dropdown {
+  position: absolute; top: calc(100% + 5px);
+  left: 0; right: 0;
+  background: rgba(18,28,48,0.96);
+  backdrop-filter: blur(24px);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--r-md);
+  overflow: hidden; z-index: 200;
+  display: none;
+}
+.search-dropdown.open { display: block; }
+.search-item {
+  padding: 11px 18px;
+  cursor: pointer;
+  font-size: 0.88rem;
+  color: var(--text-2);
+  transition: background 0.14s, color 0.14s;
+  border-bottom: 1px solid var(--divider);
+  display: flex; align-items: center; gap: 10px;
+}
+.search-item:last-child { border-bottom: none; }
+.search-item:hover { background: var(--cloud-mid); color: var(--text-1); }
+
+/* ── UNIT TOGGLE ── */
+.unit-row {
+  display: flex; align-items: center;
+  justify-content: center; gap: 8px;
+  margin-bottom: 20px;
+}
+.unit-pill {
+  display: flex;
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: 30px; padding: 3px;
+}
+.unit-btn {
+  padding: 5px 16px;
+  border-radius: 26px; border: none;
+  background: transparent;
+  color: var(--text-2);
+  font-size: 0.82rem; font-weight: 500;
+  cursor: pointer;
+  transition: all 0.18s;
+  font-family: var(--font-sans);
+}
+.unit-btn.active {
+  background: var(--cloud-mid);
+  color: var(--text-1);
+}
+.detect-btn {
+  display: flex; align-items: center; gap: 7px;
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  color: var(--text-2);
+  padding: 6px 16px; border-radius: 30px;
+  font-size: 0.82rem; cursor: pointer;
+  font-family: var(--font-sans);
+  transition: background 0.18s, color 0.18s;
+}
+.detect-btn:hover { background: var(--cloud-mid); color: var(--text-1); }
+.gps-dot {
+  width: 7px; height: 7px;
+  background: #4ade80; border-radius: 50%;
+  animation: gpsPulse 1.8s ease-in-out infinite;
+}
+@keyframes gpsPulse {
+  0%,100% { opacity: 1; transform: scale(1); }
+  50%      { opacity: 0.35; transform: scale(0.65); }
+}
+
+/* ── GLASS CARD ── */
+.card {
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--r-lg);
+  backdrop-filter: var(--glass-blur);
+  box-shadow: var(--shadow-card);
+  padding: 22px;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+.card:hover { transform: translateY(-2px); box-shadow: var(--shadow-hover); }
+
+/* ── PAGES ── */
+.page { display: none; }
+.page.active { display: block; }
+
+/* ── HERO ── */
+.hero {
+  text-align: center;
+  padding: 32px 16px 24px;
+}
+.hero-eyebrow {
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 3px;
+}
+.hero-city {
+  font-family: var(--font-serif);
+  font-size: clamp(1.6rem, 5vw, 2.4rem);
+  font-weight: 400;
+  letter-spacing: -0.5px;
+  margin-bottom: 2px;
+  color: var(--text-1);
+}
+.hero-time {
+  font-size: 0.78rem;
+  color: var(--text-3);
+  margin-bottom: 24px;
+}
+.hero-icon-wrap {
+  width: 96px; height: 96px;
+  margin: 0 auto 10px;
+  display: flex; align-items: center; justify-content: center;
+  animation: float 5s ease-in-out infinite;
+  color: var(--text-1);
+}
+.hero-icon-wrap svg {
+  width: 80px; height: 80px;
+  filter: drop-shadow(0 6px 16px rgba(74,144,217,0.2));
+}
+@keyframes float {
+  0%,100% { transform: translateY(0); }
+  50%      { transform: translateY(-7px); }
+}
+.hero-temp {
+  font-family: var(--font-serif);
+  font-size: clamp(5rem, 16vw, 9rem);
+  font-weight: 400;
+  line-height: 0.9;
+  letter-spacing: -4px;
+  animation: tempReveal 0.7s cubic-bezier(.22,1,.36,1) both;
+}
+@keyframes tempReveal {
+  from { opacity: 0; transform: scale(0.88) translateY(12px); }
+  to   { opacity: 1; transform: scale(1) translateY(0); }
+}
+.hero-condition {
+  font-size: 1.05rem;
+  color: var(--text-2);
+  margin: 8px 0 6px;
+  font-weight: 400;
+}
+.hero-range {
+  font-size: 0.82rem;
+  color: var(--text-3);
+}
+.hero-range b { color: var(--text-2); font-weight: 500; }
+
+/* Quick stats strip */
+.stats-strip {
+  display: flex; justify-content: center;
+  gap: 28px; flex-wrap: wrap;
+  margin-top: 20px; padding-top: 18px;
+  border-top: 1px solid var(--divider);
+}
+.stat {
+  text-align: center; min-width: 52px;
+}
+.stat-val {
+  font-size: 1rem; font-weight: 600;
+  color: var(--text-1);
+  display: flex; align-items: center;
+  justify-content: center; gap: 4px;
+}
+.stat-lbl {
+  font-size: 0.67rem; color: var(--text-3);
+  margin-top: 3px; text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+/* ── LAYOUT GRIDS ── */
+.g2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px; }
+.g3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; margin-bottom: 14px; }
+.span2 { grid-column: span 2; }
+.span3 { grid-column: span 3; }
+.mb14 { margin-bottom: 14px; }
+
+/* ── SECTION HEADER ── */
+.sec-head {
+  font-size: 0.68rem; font-weight: 600;
+  letter-spacing: 0.1em; text-transform: uppercase;
+  color: var(--text-3); margin-bottom: 14px;
+}
+.row-between {
+  display: flex; align-items: center;
+  justify-content: space-between; margin-bottom: 14px;
+}
+.chip {
+  padding: 4px 12px; border-radius: 20px;
+  font-size: 0.7rem; font-weight: 500;
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  color: var(--text-2);
+  cursor: pointer; transition: background 0.16s;
+}
+.chip:hover { background: var(--cloud-mid); color: var(--text-1); }
+
+/* ── HOURLY SCROLL ── */
+.hourly-scroll {
+  display: flex; gap: 8px;
+  overflow-x: auto; padding-bottom: 4px;
+  scrollbar-width: none;
+}
+.hourly-scroll::-webkit-scrollbar { display: none; }
+.hr-item {
+  flex: 0 0 68px; text-align: center;
+  background: var(--glass-bg);
+  border-radius: 36px;
+  padding: 13px 6px;
+  border: 1px solid var(--glass-border);
+  cursor: pointer;
+  transition: background 0.18s, transform 0.18s;
+}
+.hr-item:hover, .hr-item.active {
+  background: var(--accent-dim);
+  border-color: rgba(74,144,217,0.3);
+  transform: translateY(-2px);
+}
+.hr-time { font-size: 0.67rem; color: var(--text-3); margin-bottom: 7px; }
+.hr-icon { color: var(--text-1); margin-bottom: 5px;
+  display: flex; justify-content: center; }
+.hr-icon svg { width: 22px; height: 22px; }
+.hr-temp { font-size: 0.88rem; font-weight: 600; }
+.hr-rain { font-size: 0.65rem; color: var(--accent); margin-top: 3px; }
+
+/* ── CHART ── */
+.chart-wrap { position: relative; height: 170px; margin-top: 6px; }
+
+/* ── DAILY ── */
+.daily-list { display: flex; flex-direction: column; }
+.day-row {
+  display: flex; align-items: center;
+  justify-content: space-between;
+  padding: 12px 4px;
+  border-bottom: 1px solid var(--divider);
+  cursor: pointer;
+  border-radius: var(--r-sm);
+  transition: background 0.14s;
+}
+.day-row:last-child { border-bottom: none; }
+.day-row:hover { background: var(--cloud-pale); padding-left: 10px; }
+.day-name { font-size: 0.88rem; font-weight: 500; width: 88px; }
+.day-icon { color: var(--text-1); display: flex; }
+.day-icon svg { width: 22px; height: 22px; }
+.day-desc { font-size: 0.74rem; color: var(--text-3); flex: 1; text-align: center; }
+.day-temps { display: flex; gap: 8px; font-size: 0.88rem; font-weight: 500; }
+.day-lo { color: var(--text-3); }
+
+/* ── DETAIL CARDS (4-up grid) ── */
+.detail-grid {
+  display: grid; grid-template-columns: repeat(4, 1fr);
+  gap: 12px; margin-bottom: 14px;
+}
+.detail-card {
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--r-md);
+  padding: 16px;
+  text-align: center;
+  backdrop-filter: var(--glass-blur);
+  transition: transform 0.18s;
+}
+.detail-card:hover { transform: translateY(-2px); }
+.detail-icon { color: var(--accent); margin-bottom: 8px;
+  display: flex; justify-content: center; }
+.detail-icon svg { width: 22px; height: 22px; }
+.detail-val { font-size: 1.15rem; font-weight: 700; line-height: 1; }
+.detail-lbl {
+  font-size: 0.65rem; color: var(--text-3);
+  margin-top: 4px; text-transform: uppercase;
+  letter-spacing: 0.07em;
+}
+.detail-sub { font-size: 0.7rem; color: var(--text-3); margin-top: 3px; }
+
+/* ── AIR QUALITY ── */
+.aqi-row { display: flex; align-items: center; gap: 18px; margin-bottom: 14px; }
+.aqi-ring {
+  width: 78px; height: 78px; border-radius: 50%;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  background: var(--glass-bg);
+  border: 2.5px solid; flex-shrink: 0;
+}
+.aqi-num { font-size: 1.4rem; font-weight: 700; line-height: 1; }
+.aqi-text { font-size: 0.58rem; color: var(--text-3);
+  text-transform: uppercase; letter-spacing: 0.06em; }
+.aqi-bar {
+  height: 6px; border-radius: 6px;
+  background: linear-gradient(90deg, #4ade80, #facc15, #fb923c, #f87171, #c084fc, #7e0023);
+  position: relative; margin-top: 8px;
+}
+.aqi-needle {
+  position: absolute; top: 50%;
+  transform: translate(-50%, -50%);
+  width: 12px; height: 12px;
+  background: #fff; border-radius: 50%;
+  box-shadow: 0 1px 6px rgba(0,0,0,0.35);
+  transition: left 1.2s cubic-bezier(.22,1,.36,1);
+}
+.pollutant-grid {
+  display: grid; grid-template-columns: repeat(3,1fr); gap: 7px; margin-top: 12px;
+}
+.poll-item {
+  background: var(--glass-bg); border-radius: 9px;
+  padding: 8px 10px; text-align: center;
+}
+.poll-val { font-weight: 600; font-size: 0.85rem; }
+.poll-lbl { font-size: 0.62rem; color: var(--text-3); margin-top: 2px; }
+
+/* ── SUN ARC ── */
+.sun-card { display: flex; align-items: center; gap: 18px; }
+.sun-arc-wrap { flex: 1; position: relative; height: 78px; }
+.sun-arc-svg { width: 100%; height: 100%; }
+.sun-times { display: flex; gap: 24px; }
+.sun-item { text-align: center; }
+.sun-val { font-size: 1rem; font-weight: 600; }
+.sun-lbl { font-size: 0.65rem; color: var(--text-3);
+  text-transform: uppercase; letter-spacing: 0.06em; margin-top: 2px; }
+
+/* ── CITY GRID (City Pages) ── */
+.city-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 12px; margin-bottom: 14px;
+}
+.city-card {
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--r-md);
+  padding: 18px;
+  cursor: pointer;
+  transition: transform 0.18s, box-shadow 0.18s, border-color 0.18s;
+  text-decoration: none;
+  color: inherit;
+  display: block;
+}
+.city-card:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-hover);
+  border-color: rgba(74,144,217,0.3);
+}
+.city-card-name { font-weight: 600; font-size: 0.95rem; }
+.city-card-country { font-size: 0.72rem; color: var(--text-3); margin-top: 2px; }
+.city-card-temp { font-family: var(--font-serif); font-size: 2rem; margin: 8px 0 4px; }
+.city-card-cond { font-size: 0.78rem; color: var(--text-2); display: flex; align-items: center; gap: 5px; }
+.city-card-cond svg { width: 14px; height: 14px; }
+
+/* ── ALERTS ── */
+.alert-card {
+  background: rgba(239,68,68,0.08);
+  border: 1px solid rgba(239,68,68,0.22);
+  border-radius: var(--r-md); padding: 18px 20px;
+  margin-bottom: 10px; display: flex; gap: 14px;
+  animation: alertPulse 2.4s ease-in-out infinite;
+}
+.alert-card.warning {
+  background: rgba(245,158,11,0.08);
+  border-color: rgba(245,158,11,0.22);
+}
+.alert-card.info {
+  background: rgba(74,144,217,0.08);
+  border-color: rgba(74,144,217,0.22);
+  animation: none;
+}
+@keyframes alertPulse {
+  0%,100% { box-shadow: none; }
+  50%      { box-shadow: 0 0 0 6px rgba(239,68,68,0.06); }
+}
+.alert-icon { color: var(--text-1); flex-shrink: 0; }
+.alert-icon svg { width: 22px; height: 22px; margin-top: 1px; }
+.alert-title { font-weight: 600; font-size: 0.9rem; margin-bottom: 4px; }
+.alert-desc { font-size: 0.82rem; color: var(--text-2); line-height: 1.55; }
+.alert-time { font-size: 0.7rem; color: var(--text-3); margin-top: 6px; }
+
+/* ── INSIGHT CARD ── */
+.insight {
+  background: rgba(74,144,217,0.07);
+  border: 1px solid rgba(74,144,217,0.18);
+  border-radius: var(--r-md); padding: 16px 18px;
+  margin-bottom: 10px; display: flex; gap: 13px;
+}
+.insight-icon {
+  width: 34px; height: 34px; border-radius: 9px;
+  background: var(--accent-dim);
+  border: 1px solid rgba(74,144,217,0.2);
+  display: flex; align-items: center; justify-content: center;
+  color: var(--accent); flex-shrink: 0;
+}
+.insight-icon svg { width: 17px; height: 17px; }
+.insight-label {
+  font-size: 0.64rem; text-transform: uppercase;
+  letter-spacing: 0.08em; color: var(--accent);
+  margin-bottom: 4px;
+}
+.insight-text { font-size: 0.86rem; line-height: 1.6; color: var(--text-2); }
+
+/* ── RADAR ── */
+.radar-box {
+  border-radius: var(--r-lg); overflow: hidden;
+  height: 400px;
+  background: rgba(10,16,26,0.5);
+  position: relative;
+  display: flex; align-items: center; justify-content: center;
+}
+.radar-placeholder { text-align: center; color: var(--text-3); }
+.radar-placeholder svg { width: 56px; height: 56px; margin-bottom: 12px; opacity: 0.4; }
+.layer-row { display: flex; gap: 7px; flex-wrap: wrap; margin-bottom: 12px; }
+.layer-chip {
+  padding: 5px 13px; border-radius: 24px;
+  border: 1px solid var(--glass-border);
+  background: var(--glass-bg);
+  font-size: 0.76rem; cursor: pointer;
+  transition: all 0.16s;
+  display: flex; align-items: center; gap: 5px;
+  color: var(--text-2);
+}
+.layer-chip svg { width: 14px; height: 14px; }
+.layer-chip.on {
+  background: var(--accent-dim);
+  border-color: rgba(74,144,217,0.35);
+  color: var(--text-1);
+}
+
+/* ── SETTINGS ── */
+.saved-city {
+  display: flex; align-items: center;
+  justify-content: space-between;
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--r-md); padding: 14px 18px;
+  cursor: pointer;
+  transition: transform 0.16s, border-color 0.16s;
+  margin-bottom: 8px;
+}
+.saved-city:hover { transform: translateX(4px); border-color: rgba(74,144,217,0.3); }
+.saved-city-name { font-weight: 600; font-size: 0.92rem; }
+.saved-city-meta { font-size: 0.76rem; color: var(--text-3); margin-top: 2px; }
+.saved-city-temp { font-family: var(--font-serif); font-size: 1.6rem; }
+.toggle-row {
+  display: flex; align-items: center;
+  justify-content: space-between;
+  padding: 13px 2px;
+  border-bottom: 1px solid var(--divider);
+}
+.toggle-row:last-child { border-bottom: none; }
+.toggle-title { font-weight: 500; font-size: 0.88rem; }
+.toggle-sub { font-size: 0.72rem; color: var(--text-3); margin-top: 2px; }
+.toggle {
+  position: relative; width: 44px; height: 24px; flex-shrink: 0;
+}
+.toggle input { opacity: 0; width: 0; height: 0; }
+.toggle-track {
+  position: absolute; inset: 0;
+  background: var(--cloud-mid);
+  border-radius: 24px; cursor: pointer;
+  transition: background 0.28s;
+}
+.toggle-track::before {
+  content: ''; position: absolute;
+  width: 18px; height: 18px;
+  left: 3px; top: 3px;
+  background: #fff; border-radius: 50%;
+  transition: transform 0.28s;
+}
+.toggle input:checked + .toggle-track { background: var(--accent); }
+.toggle input:checked + .toggle-track::before { transform: translateX(20px); }
+
+/* ── PAGE HEADER ── */
+.page-hd { margin: 6px 0 20px; }
+.page-hd-title {
+  font-family: var(--font-serif);
+  font-size: 1.8rem; font-weight: 400;
+  letter-spacing: -0.3px;
+}
+.page-hd-sub { font-size: 0.82rem; color: var(--text-3); margin-top: 4px; }
+
+/* ── WIND TABLE ── */
+.wind-row {
+  display: flex; align-items: center; gap: 12px;
+  padding: 10px 4px;
+  border-bottom: 1px solid var(--divider);
+}
+.wind-compass {
+  width: 32px; height: 32px; border-radius: 50%;
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.75rem; flex-shrink: 0; color: var(--accent);
+}
+
+/* ── BOTTOM NAV (mobile) ── */
+.bottom-nav {
+  display: none;
+  position: fixed; bottom: 0; left: 0; right: 0;
+  background: rgba(9,14,26,0.88);
+  backdrop-filter: blur(28px);
+  border-top: 1px solid var(--divider);
+  padding: 8px 0 env(safe-area-inset-bottom, 0px);
+  z-index: 300;
+}
+.bnav-list {
+  display: flex; justify-content: space-around; list-style: none;
+}
+.bnav-list button {
+  background: none; border: none;
+  color: var(--text-3);
+  display: flex; flex-direction: column;
+  align-items: center; gap: 3px;
+  padding: 6px 12px; cursor: pointer;
+  transition: color 0.18s;
+  font-family: var(--font-sans);
+}
+.bnav-list button.active { color: var(--text-1); }
+.bnav-list button svg { width: 22px; height: 22px; }
+.bnav-list button span { font-size: 0.62rem; letter-spacing: 0.03em; }
+
+/* ── TOAST ── */
+.toast {
+  position: fixed; top: 18px; right: 18px;
+  background: rgba(18,28,52,0.95);
+  backdrop-filter: blur(20px);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--r-md); padding: 13px 18px;
+  font-size: 0.86rem; z-index: 9999;
+  max-width: 280px;
+  transform: translateX(120%);
+  transition: transform 0.38s cubic-bezier(.22,1,.36,1);
+  box-shadow: var(--shadow-card);
+}
+.toast.show { transform: translateX(0); }
+.toast-title { font-weight: 600; margin-bottom: 2px; }
+.toast-msg { font-size: 0.78rem; color: var(--text-2); }
+
+/* ── LOADING ── */
+.skeleton {
+  background: linear-gradient(90deg,
+    var(--cloud-pale) 25%, var(--cloud-mid) 50%, var(--cloud-pale) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.6s infinite;
+  border-radius: 6px;
+}
+@keyframes shimmer {
+  from { background-position: 200% 0; }
+  to   { background-position: -200% 0; }
+}
+
+/* ── RESPONSIVE ── */
+@media (max-width: 880px) {
+  .detail-grid { grid-template-columns: repeat(3,1fr); }
+  .g3 { grid-template-columns: 1fr 1fr; }
+}
+@media (max-width: 640px) {
+  .nav-links { display: none; }
+  .nav-hamburger { display: flex; }
+  .bottom-nav { display: block; }
+  .shell { padding-bottom: 88px; }
+  .detail-grid { grid-template-columns: repeat(2,1fr); }
+  .g2 { grid-template-columns: 1fr; }
+  .g3 { grid-template-columns: 1fr; }
+  .g3 .span2, .span2 { grid-column: span 1; }
+  .aqi-row { flex-direction: column; align-items: flex-start; }
+  .sun-card { flex-direction: column; }
+  .hero-temp { font-size: clamp(4rem,22vw,7rem); }
+  .pollutant-grid { grid-template-columns: repeat(2,1fr); }
+  .city-grid { grid-template-columns: repeat(2,1fr); }
+}
+@media (max-width: 380px) {
+  .stats-strip { gap: 16px; }
+  .hr-item { flex: 0 0 60px; }
+  .detail-grid { grid-template-columns: repeat(2,1fr); }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* ── SITEMAP PAGE ── */
+.sitemap-section { margin-bottom: 32px; }
+.sitemap-section h2 {
+  font-family: var(--font-serif);
+  font-size: 1.2rem; font-weight: 400;
+  color: var(--text-1); margin-bottom: 12px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--divider);
+}
+.sitemap-links { display: flex; flex-wrap: wrap; gap: 8px; }
+.sitemap-link {
+  padding: 6px 14px; border-radius: 20px;
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  font-size: 0.8rem; color: var(--accent);
+  text-decoration: none; cursor: pointer;
+  transition: background 0.16s;
+}
+.sitemap-link:hover { background: var(--accent-dim); }
+
+/* ── API KEY INPUT ── */
+.api-input {
+  width: 100%; padding: 10px 14px;
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--r-sm);
+  color: var(--text-1);
+  font-family: var(--font-sans); font-size: 0.86rem;
+  outline: none;
+  transition: border 0.18s;
+}
+.api-input:focus { border-color: rgba(74,144,217,0.4); }
+.api-input::placeholder { color: var(--text-3); }
+</style>
+</head>
+<body class="wx-clear">
+
+<!-- ── Atmospheric Clouds ── -->
+<div class="sky-canvas" aria-hidden="true">
+  <div class="cloud-band cloud-band-1">
+    <svg class="cloud-shape" style="position:absolute;left:8%;top:6%;width:320px;height:90px" viewBox="0 0 320 90"><ellipse cx="160" cy="62" rx="140" ry="26"/><ellipse cx="110" cy="50" rx="70" ry="40"/><ellipse cx="215" cy="52" rx="62" ry="36"/></svg>
+    <svg class="cloud-shape" style="position:absolute;left:54%;top:14%;width:280px;height:80px" viewBox="0 0 280 80"><ellipse cx="140" cy="56" rx="120" ry="22"/><ellipse cx="95" cy="44" rx="60" ry="34"/><ellipse cx="190" cy="46" rx="52" ry="30"/></svg>
+  </div>
+  <div class="cloud-band cloud-band-2">
+    <svg class="cloud-shape" style="position:absolute;left:18%;top:4%;width:380px;height:110px" viewBox="0 0 380 110"><ellipse cx="190" cy="78" rx="168" ry="30"/><ellipse cx="130" cy="62" rx="84" ry="50"/><ellipse cx="258" cy="66" rx="76" ry="46"/></svg>
+    <svg class="cloud-shape" style="position:absolute;left:62%;top:10%;width:260px;height:75px" viewBox="0 0 260 75"><ellipse cx="130" cy="52" rx="112" ry="21"/><ellipse cx="88" cy="42" rx="56" ry="32"/><ellipse cx="174" cy="44" rx="48" ry="28"/></svg>
+  </div>
+</div>
+
+<!-- Rain particles -->
+<div class="rain-wrap" id="rainWrap"></div>
+
+<!-- Toast -->
+<div class="toast" id="toast">
+  <div class="toast-title" id="toastTitle">—</div>
+  <div class="toast-msg" id="toastMsg"></div>
+</div>
+
+<!-- Mobile Drawer -->
+<div class="mobile-drawer" id="mobileDrawer">
+  <button class="drawer-close" onclick="closeDrawer()">✕</button>
+  <a href="#" onclick="nav('home');closeDrawer()">Home</a>
+  <a href="#" onclick="nav('hourly');closeDrawer()">Hourly</a>
+  <a href="#" onclick="nav('daily');closeDrawer()">Daily</a>
+  <a href="#" onclick="nav('radar');closeDrawer()">Radar</a>
+  <a href="#" onclick="nav('alerts');closeDrawer()">Alerts</a>
+  <a href="#" onclick="nav('settings');closeDrawer()">Settings</a>
+</div>
+
+<div class="shell">
+
+  <!-- ══ NAV ══ -->
+  <nav class="nav">
+    <a class="brand" href="#" onclick="nav('home');return false">
+      <div class="brand-mark">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z"/></svg>
+      </div>
+      <div class="brand-name">
+        <span>Weather Forecast Nepal</span>
+        <span>weatherforecastnepal.com</span>
+      </div>
+    </a>
+
+    <ul class="nav-links">
+      <li><a href="#" class="active" id="nl-home" onclick="nav('home');return false">
+        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+        Home</a></li>
+      <li><a href="#" id="nl-hourly" onclick="nav('hourly');return false">Hourly</a></li>
+      <li><a href="#" id="nl-daily" onclick="nav('daily');return false">Daily</a></li>
+      <li><a href="#" id="nl-radar" onclick="nav('radar');return false">Radar</a></li>
+      <li><a href="#" id="nl-alerts" onclick="nav('alerts');return false">Alerts</a></li>
+      <li><a href="#" id="nl-cities" onclick="nav('cities');return false">Cities</a></li>
+      <li><a href="#" id="nl-settings" onclick="nav('settings');return false">Settings</a></li>
+    </ul>
+
+    <div class="nav-hamburger" id="hamburger" onclick="openDrawer()">
+      <span></span><span></span><span></span>
+    </div>
+  </nav>
+
+  <!-- ══════════════
+       PAGE: HOME
+  ══════════════ -->
+  <div class="page active" id="page-home">
+
+    <!-- Breadcrumb (SEO) -->
+    <nav class="breadcrumb" aria-label="Breadcrumb">
+      <a href="#">Home</a>
+      <span class="breadcrumb-sep">/</span>
+      <a href="#">Weather</a>
+      <span class="breadcrumb-sep">/</span>
+      <span class="current" id="breadcrumbCity">Kathmandu</span>
+    </nav>
+
+    <!-- Controls row -->
+    <div style="text-align:center;margin-bottom:10px">
+      <button class="detect-btn" onclick="detectLocation()">
+        <span class="gps-dot"></span> Use my location
+      </button>
+    </div>
+
+    <div class="search-zone">
+      <span class="search-icon">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+      </span>
+      <input class="search-input" id="searchInput" type="text"
+        placeholder="Search city in Nepal or worldwide…"
+        oninput="handleSearch(this.value)"
+        onkeydown="if(event.key==='Enter'){fetchWeather(this.value);this.value=''}">
+      <button class="search-go" onclick="fetchWeather(document.getElementById('searchInput').value)">
+        <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg>
+      </button>
+      <div class="search-dropdown" id="searchDrop"></div>
+    </div>
+
+    <div class="unit-row">
+      <div class="unit-pill">
+        <button class="unit-btn active" id="btnC" onclick="setUnit('C')">°C</button>
+        <button class="unit-btn" id="btnF" onclick="setUnit('F')">°F</button>
+      </div>
+    </div>
+
+    <!-- AI Insight -->
+    <div class="insight mb14" id="aiInsight">
+      <div class="insight-icon">
+        <svg xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2zm0 4v4m0 4h.01"/></svg>
+      </div>
+      <div>
+        <div class="insight-label">Today's Forecast Insight</div>
+        <div class="insight-text" id="aiText">Light clouds expected this afternoon. UV index moderate — apply sunscreen if outdoors past noon. Morning hours ideal for trekking.</div>
+      </div>
+    </div>
+
+    <!-- Hero Current Weather -->
+    <div class="card mb14">
+      <div class="hero">
+        <div class="hero-eyebrow">Current Conditions</div>
+        <div class="hero-city" id="heroCity">Kathmandu</div>
+        <div class="hero-time" id="heroTime">Thursday, June 11 · 2:30 PM NPT</div>
+        <div class="hero-icon-wrap" id="heroIconWrap">
+          <!-- Populated by JS with Lucide icon -->
+        </div>
+        <div class="hero-temp" id="heroTemp">28°</div>
+        <div class="hero-condition" id="heroCond">Partly Cloudy</div>
+        <div class="hero-range">
+          Feels like <b id="heroFeels">31°</b> &nbsp;·&nbsp;
+          High <b id="heroHigh">32°</b> &nbsp;·&nbsp;
+          Low <b id="heroLow">19°</b>
+        </div>
+        <div class="stats-strip">
+          <div class="stat">
+            <div class="stat-val" id="qsHumidity">72%</div>
+            <div class="stat-lbl">Humidity</div>
+          </div>
+          <div class="stat">
+            <div class="stat-val" id="qsWind">14 km/h</div>
+            <div class="stat-lbl">Wind</div>
+          </div>
+          <div class="stat">
+            <div class="stat-val" id="qsUV">4</div>
+            <div class="stat-lbl">UV Index</div>
+          </div>
+          <div class="stat">
+            <div class="stat-val" id="qsVis">10 km</div>
+            <div class="stat-lbl">Visibility</div>
+          </div>
+          <div class="stat">
+            <div class="stat-val" id="qsPres">1013</div>
+            <div class="stat-lbl">hPa</div>
+          </div>
+          <div class="stat">
+            <div class="stat-val" id="qsDew">18°</div>
+            <div class="stat-lbl">Dew Point</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Hourly -->
+    <div class="card mb14">
+      <div class="row-between">
+        <div class="sec-head" style="margin:0">Hourly Forecast</div>
+        <button class="chip" onclick="nav('hourly')">24-hour detail</button>
+      </div>
+      <div class="hourly-scroll" id="hourlyScroll"></div>
+    </div>
+
+    <!-- Temperature Chart -->
+    <div class="card mb14">
+      <div class="sec-head">Temperature Trend — Next 24 Hours</div>
+      <div class="chart-wrap"><canvas id="tempChart"></canvas></div>
+    </div>
+
+    <!-- Detail cards -->
+    <div class="detail-grid mb14" id="detailGrid">
+      <div class="detail-card">
+        <div class="detail-icon"><svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 14.76V3.5a2.5 2.5 0 0 0-5 0v11.26a4.5 4.5 0 1 0 5 0z"/></svg></div>
+        <div class="detail-val" id="dTemp">28°C</div>
+        <div class="detail-lbl">Temperature</div>
+        <div class="detail-sub" id="dFeels">Feels 31°</div>
+      </div>
+      <div class="detail-card">
+        <div class="detail-icon"><svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22a7 7 0 0 0 7-7c0-2-1-3.9-3-5.5s-3.5-4-4-6.5c-.5 2.5-2 4.9-4 6.5C6 11.1 5 13 5 15a7 7 0 0 0 7 7z"/></svg></div>
+        <div class="detail-val" id="dHum">72%</div>
+        <div class="detail-lbl">Humidity</div>
+        <div class="detail-sub">Moderate</div>
+      </div>
+      <div class="detail-card">
+        <div class="detail-icon"><svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.7 7.7a2.5 2.5 0 1 1 1.8 4.3H2"/><path d="M9.6 4.6A2 2 0 1 1 11 8H2"/><path d="M12.6 19.4A2 2 0 1 0 14 16H2"/></svg></div>
+        <div class="detail-val" id="dWind">14 km/h</div>
+        <div class="detail-lbl">Wind</div>
+        <div class="detail-sub" id="dWindDir">NW</div>
+      </div>
+      <div class="detail-card">
+        <div class="detail-icon"><svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg></div>
+        <div class="detail-val" id="dPres">1013</div>
+        <div class="detail-lbl">Pressure hPa</div>
+        <div class="detail-sub">Steady</div>
+      </div>
+      <div class="detail-card">
+        <div class="detail-icon"><svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg></div>
+        <div class="detail-val" id="dUV">4</div>
+        <div class="detail-lbl">UV Index</div>
+        <div class="detail-sub" id="dUVL">Moderate</div>
+      </div>
+      <div class="detail-card">
+        <div class="detail-icon"><svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7z"/></svg></div>
+        <div class="detail-val" id="dVis">10 km</div>
+        <div class="detail-lbl">Visibility</div>
+        <div class="detail-sub">Clear</div>
+      </div>
+      <div class="detail-card">
+        <div class="detail-icon"><svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z"/></svg></div>
+        <div class="detail-val" id="dDew">18°</div>
+        <div class="detail-lbl">Dew Point</div>
+        <div class="detail-sub">Comfortable</div>
+      </div>
+      <div class="detail-card">
+        <div class="detail-icon"><svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12a10 10 0 0 0 10 10c4 0 7.4-2.3 9-5.7"/><path d="M2 12a10 10 0 0 1 10-10c4 0 7.4 2.3 9 5.7"/><circle cx="12" cy="12" r="3"/></svg></div>
+        <div class="detail-val" id="dAQI">52</div>
+        <div class="detail-lbl">Air Quality</div>
+        <div class="detail-sub" id="dAQIL">Moderate</div>
+      </div>
+    </div>
+
+    <!-- Air Quality -->
+    <div class="card mb14">
+      <div class="row-between">
+        <div class="sec-head" style="margin:0">Air Quality Index</div>
+        <span class="chip" id="aqiLabel" style="color:#facc15">Moderate</span>
+      </div>
+      <div class="aqi-row">
+        <div class="aqi-ring" id="aqiRing" style="border-color:#facc15">
+          <div class="aqi-num" id="aqiNum">52</div>
+          <div class="aqi-text">AQI</div>
+        </div>
+        <div style="flex:1">
+          <div style="font-size:0.8rem;color:var(--text-2);margin-bottom:9px" id="aqiDesc">
+            Acceptable air quality. Moderate concern for a small number of sensitive individuals.
+          </div>
+          <div class="aqi-bar">
+            <div class="aqi-needle" id="aqiNeedle" style="left:20%"></div>
+          </div>
+          <div style="display:flex;justify-content:space-between;font-size:0.62rem;color:var(--text-3);margin-top:5px">
+            <span>Good</span><span>Moderate</span><span>Unhealthy</span><span>Hazardous</span>
+          </div>
+        </div>
+      </div>
+      <div class="pollutant-grid">
+        <div class="poll-item"><div class="poll-val">18 μg</div><div class="poll-lbl">PM2.5</div></div>
+        <div class="poll-item"><div class="poll-val">32 μg</div><div class="poll-lbl">PM10</div></div>
+        <div class="poll-item"><div class="poll-val">0.4 ppm</div><div class="poll-lbl">CO</div></div>
+        <div class="poll-item"><div class="poll-val">12 ppb</div><div class="poll-lbl">NO₂</div></div>
+        <div class="poll-item"><div class="poll-val">4 ppb</div><div class="poll-lbl">SO₂</div></div>
+        <div class="poll-item"><div class="poll-val">28 ppb</div><div class="poll-lbl">Ozone</div></div>
+      </div>
+    </div>
+
+    <!-- Rain chart -->
+    <div class="card mb14">
+      <div class="sec-head">Rain Probability — Next 24h</div>
+      <div class="chart-wrap"><canvas id="rainChart"></canvas></div>
+    </div>
+
+    <!-- Sunrise / Sunset -->
+    <div class="card mb14">
+      <div class="sec-head" style="margin-bottom:10px">Sunrise &amp; Sunset</div>
+      <div class="sun-card">
+        <div class="sun-arc-wrap">
+          <svg class="sun-arc-svg" viewBox="0 0 300 78">
+            <defs>
+              <linearGradient id="arcGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                <stop offset="0%" style="stop-color:#f97316;stop-opacity:0.5"/>
+                <stop offset="50%" style="stop-color:#fbbf24;stop-opacity:0.7"/>
+                <stop offset="100%" style="stop-color:#ef4444;stop-opacity:0.5"/>
+              </linearGradient>
+            </defs>
+            <path d="M 20 68 Q 150 8 280 68" stroke="url(#arcGrad)" stroke-width="2"
+              fill="none" stroke-dasharray="5,3" opacity="0.55"/>
+            <circle id="sunDot" cx="150" cy="20" r="6" fill="#fbbf24"
+              style="filter:drop-shadow(0 0 5px rgba(251,191,36,0.6))">
+              <animateMotion dur="24s" repeatCount="indefinite">
+                <mpath href="#sunArcPath"/>
+              </animateMotion>
+            </circle>
+            <path id="sunArcPath" d="M 20 68 Q 150 8 280 68" fill="none"/>
+            <line x1="20" y1="68" x2="280" y2="68" stroke="rgba(255,255,255,0.1)" stroke-width="1"/>
+          </svg>
+        </div>
+        <div class="sun-times">
+          <div class="sun-item">
+            <div style="color:var(--accent);margin-bottom:5px">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v2M4.93 4.93l1.41 1.41M2 12h2M19.07 4.93l-1.41 1.41M22 12h-2M12 8a4 4 0 0 1 0 8M17 17H7l-4 5h18l-4-5"/></svg>
+            </div>
+            <div class="sun-val" id="sunriseTime">5:18 AM</div>
+            <div class="sun-lbl">Sunrise</div>
+          </div>
+          <div class="sun-item">
+            <div style="color:#fb923c;margin-bottom:5px">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 10V2M4.93 10.93l1.41-1.41M2 18h2M22 18h-2M19.07 10.93l-1.41-1.41M12 14a4 4 0 0 1 0-8M17 18H7l-4 5h18l-4-5"/></svg>
+            </div>
+            <div class="sun-val" id="sunsetTime">6:49 PM</div>
+            <div class="sun-lbl">Sunset</div>
+          </div>
+        </div>
+      </div>
+      <div style="display:flex;justify-content:space-between;margin-top:13px;font-size:0.79rem;color:var(--text-3)">
+        <span>Day length: <b id="dayLen" style="color:var(--text-2)">13h 31m</b></span>
+        <span id="moonPhase" style="color:var(--text-2)">First Quarter Moon</span>
+      </div>
+    </div>
+
+    <!-- 7-day preview -->
+    <div class="card mb14">
+      <div class="row-between">
+        <div class="sec-head" style="margin:0">10-Day Forecast</div>
+        <button class="chip" onclick="nav('daily')">Full forecast</button>
+      </div>
+      <div class="daily-list" id="dailyHome"></div>
+    </div>
+
+  </div><!-- /page-home -->
+
+
+  <!-- ══════════════
+       PAGE: HOURLY
+  ══════════════ -->
+  <div class="page" id="page-hourly">
+    <div class="page-hd">
+      <div class="page-hd-title">24-Hour Forecast</div>
+      <div class="page-hd-sub" id="hourlySubtitle">Kathmandu · Updated just now</div>
+    </div>
+    <div class="card mb14">
+      <div class="sec-head">Temperature</div>
+      <div style="height:200px"><canvas id="hrTempChart"></canvas></div>
+    </div>
+    <div class="card mb14">
+      <div class="sec-head">Rain Probability</div>
+      <div style="height:200px"><canvas id="hrRainChart"></canvas></div>
+    </div>
+    <div class="card mb14">
+      <div class="sec-head">Wind Speed</div>
+      <div style="height:200px"><canvas id="hrWindChart"></canvas></div>
+    </div>
+    <div class="card">
+      <div class="sec-head">Hour by Hour</div>
+      <div id="hrDetailList"></div>
+    </div>
+  </div>
+
+
+  <!-- ══════════════
+       PAGE: DAILY
+  ══════════════ -->
+  <div class="page" id="page-daily">
+    <div class="page-hd">
+      <div class="page-hd-title">Extended Forecast</div>
+      <div class="page-hd-sub">Up to 15 days ahead</div>
+    </div>
+    <div class="unit-pill" style="margin:0 auto 18px;display:inline-flex">
+      <button class="unit-btn active" onclick="setDailyRange(7,this)">7 days</button>
+      <button class="unit-btn" onclick="setDailyRange(10,this)">10 days</button>
+      <button class="unit-btn" onclick="setDailyRange(15,this)">15 days</button>
+    </div>
+    <div class="card mb14">
+      <div class="sec-head">Daily Temperature Range</div>
+      <div style="height:220px"><canvas id="dailyChart"></canvas></div>
+    </div>
+    <div class="card">
+      <div class="daily-list" id="dailyFull"></div>
+    </div>
+  </div>
+
+
+  <!-- ══════════════
+       PAGE: RADAR
+  ══════════════ -->
+  <div class="page" id="page-radar">
+    <div class="page-hd">
+      <div class="page-hd-title">Weather Radar</div>
+      <div class="page-hd-sub">Live precipitation &amp; cloud layers</div>
+    </div>
+    <div class="card mb14" style="padding:16px">
+      <div class="sec-head" style="margin-bottom:10px">Map Layers</div>
+      <div class="layer-row">
+        <span class="layer-chip on" onclick="this.classList.toggle('on')">
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 16.2A4.5 4.5 0 0 0 17.5 8h-1.8A7 7 0 1 0 4 14.9"/><path d="M16 14v6M8 14v6M12 16v6"/></svg>
+          Rain
+        </span>
+        <span class="layer-chip" onclick="this.classList.toggle('on')">
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z"/></svg>
+          Clouds
+        </span>
+        <span class="layer-chip" onclick="this.classList.toggle('on')">
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 14.76V3.5a2.5 2.5 0 0 0-5 0v11.26a4.5 4.5 0 1 0 5 0z"/></svg>
+          Temp
+        </span>
+        <span class="layer-chip" onclick="this.classList.toggle('on')">
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.7 7.7a2.5 2.5 0 1 1 1.8 4.3H2"/><path d="M9.6 4.6A2 2 0 1 1 11 8H2"/><path d="M12.6 19.4A2 2 0 1 0 14 16H2"/></svg>
+          Wind
+        </span>
+        <span class="layer-chip" onclick="this.classList.toggle('on')">
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 17.58A5 5 0 0 0 18 8h-1.26A8 8 0 1 0 4 16.25"/><polyline points="8 16 12 12 16 16"/><line x1="12" y1="12" x2="12" y2="20"/></svg>
+          Snow
+        </span>
+        <span class="layer-chip" onclick="this.classList.toggle('on')">
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 16.9A5 5 0 0 0 18 7h-1.26a8 8 0 1 0-11.62 9"/><polyline points="13 11 9 17 15 17 11 23"/></svg>
+          Lightning
+        </span>
+      </div>
+    </div>
+    <div class="radar-box">
+      <div id="radar-map" style="width:100%;height:100%"></div>
+      <div class="radar-placeholder" id="radarPlaceholder">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5.07 12.06A7.17 7.17 0 0 1 19 12"/><path d="M2 12a10 10 0 0 1 20 0"/><path d="M12 12v.01"/><circle cx="12" cy="12" r="1"/></svg>
+        <div style="font-size:0.88rem;margin-bottom:6px">Live Radar Map</div>
+        <div style="font-size:0.74rem;max-width:260px;line-height:1.5">
+          Connect Leaflet + OpenWeatherMap radar tiles to display live precipitation. Add API keys in Settings.
+        </div>
+        <div style="margin-top:12px;font-size:0.7rem;opacity:0.5">
+          Nepal: 28.3°N, 84.1°E
+        </div>
+      </div>
+    </div>
+    <div class="card" style="margin-top:12px;padding:16px">
+      <div class="sec-head">Precipitation Intensity</div>
+      <div style="display:flex;align-items:center;gap:8px;margin-top:8px">
+        <span style="font-size:0.72rem;color:var(--text-3)">Light</span>
+        <div style="flex:1;height:8px;border-radius:6px;background:linear-gradient(90deg,#60a5fa,#34d399,#fbbf24,#f87171)"></div>
+        <span style="font-size:0.72rem;color:var(--text-3)">Heavy</span>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ══════════════
+       PAGE: ALERTS
+  ══════════════ -->
+  <div class="page" id="page-alerts">
+    <div class="page-hd">
+      <div class="page-hd-title">Weather Alerts</div>
+      <div class="page-hd-sub">3 active alerts in your area</div>
+    </div>
+
+    <div class="alert-card">
+      <div class="alert-icon">
+        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#f87171" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 16.2A4.5 4.5 0 0 0 17.5 8h-1.8A7 7 0 1 0 4 14.9"/><path d="M16 14v6M8 14v6M12 16v6"/></svg>
+      </div>
+      <div>
+        <div class="alert-title">Heavy Rain Warning</div>
+        <div class="alert-desc">Heavy rainfall expected between 3 PM and 9 PM. Rainfall of 40–60mm possible. Avoid low-lying areas and flash flood zones.</div>
+        <div class="alert-time">Active until 9:00 PM · NMD Nepal</div>
+      </div>
+    </div>
+
+    <div class="alert-card warning">
+      <div class="alert-icon">
+        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fbbf24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 16.9A5 5 0 0 0 18 7h-1.26a8 8 0 1 0-11.62 9"/><polyline points="13 11 9 17 15 17 11 23"/></svg>
+      </div>
+      <div>
+        <div class="alert-title">Thunderstorm Warning</div>
+        <div class="alert-desc">Isolated thunderstorms with lightning and gusty winds up to 60 km/h possible this evening. Stay indoors during storms.</div>
+        <div class="alert-time">Active until 11:00 PM · NMD Nepal</div>
+      </div>
+    </div>
+
+    <div class="alert-card info">
+      <div class="alert-icon">
+        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#60a5fa" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>
+      </div>
+      <div>
+        <div class="alert-title">UV Index Advisory</div>
+        <div class="alert-desc">UV Index reaching 7 (High) between 11 AM and 3 PM tomorrow. Apply SPF 30+ sunscreen and wear protective clothing outdoors.</div>
+        <div class="alert-time">Tomorrow · Health Advisory</div>
+      </div>
+    </div>
+
+    <div class="sec-head" style="margin-top:24px">Recommendations</div>
+    <div class="insight mb14">
+      <div class="insight-icon">
+        <svg xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.38 3.46 16 2a4 4 0 0 1-8 0L3.62 3.46a2 2 0 0 0-1.34 2.23l.58 3.57a1 1 0 0 0 .99.84H6v10c0 1.1.9 2 2 2h8a2 2 0 0 0 2-2V10h2.15a1 1 0 0 0 .99-.84l.58-3.57a2 2 0 0 0-1.34-2.23z"/></svg>
+      </div>
+      <div>
+        <div class="insight-label">What to Wear</div>
+        <div class="insight-text">Light rain jacket recommended. Temperatures drop to 19°C after sunset — bring a layer. Comfortable waterproof footwear advised as roads may be wet.</div>
+      </div>
+    </div>
+    <div class="insight mb14">
+      <div class="insight-icon">
+        <svg xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+      </div>
+      <div>
+        <div class="insight-label">Best Hours</div>
+        <div class="insight-text">Morning hours (6–11 AM) are ideal for outdoor activities. Avoid evening treks due to thunderstorm risk. Indoor venues recommended after 3 PM.</div>
+      </div>
+    </div>
+    <div class="insight">
+      <div class="insight-icon">
+        <svg xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.8 19.2 16 11l3.5-3.5C21 6 21 4 21 4s-2 0-3.5 1.5L14 9 5.8 7.2c-.5-.1-.9.1-1.1.5l-.3.5c-.2.5-.1 1 .3 1.3L9 12l-2 3H4l-1 1 3 2 2 3 1-1v-3l3-2 3.5 3.3c.4.4.9.4 1.3.3l.5-.2c.4-.3.6-.7.5-1.2z"/></svg>
+      </div>
+      <div>
+        <div class="insight-label">Travel Note</div>
+        <div class="insight-text">Mountain roads may have reduced visibility after 5 PM. Flights to Lukla and Pokhara may face delays — check airline status before travel.</div>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ══════════════
+       PAGE: CITIES
+       (SEO city pages)
+  ══════════════ -->
+  <div class="page" id="page-cities">
+    <div class="page-hd">
+      <div class="page-hd-title">Cities</div>
+      <div class="page-hd-sub">Dedicated forecast pages — indexed for search</div>
+    </div>
+
+    <div class="sec-head">Nepal — Major Cities</div>
+    <div class="city-grid" id="nepalCityGrid"></div>
+
+    <div class="sec-head" style="margin-top:10px">International</div>
+    <div class="city-grid" id="intlCityGrid"></div>
+
+    <!-- Sitemap section -->
+    <div class="card" style="margin-top:14px">
+      <div class="sec-head">Sitemap — All City Pages</div>
+      <div style="font-size:0.78rem;color:var(--text-3);margin-bottom:14px;line-height:1.6">
+        Each city has a dedicated SEO page at <code style="background:var(--glass-bg);padding:2px 6px;border-radius:4px;font-size:0.8em">/weather/[city-slug]</code>.
+        Submit <code style="background:var(--glass-bg);padding:2px 6px;border-radius:4px;font-size:0.8em">/sitemap.xml</code> to Google Search Console for indexing.
+      </div>
+      <div class="sitemap-section">
+        <h2>Nepal</h2>
+        <div class="sitemap-links" id="sitemapNepal"></div>
+      </div>
+      <div class="sitemap-section">
+        <h2>Asia</h2>
+        <div class="sitemap-links" id="sitemapAsia"></div>
+      </div>
+      <div class="sitemap-section">
+        <h2>Global</h2>
+        <div class="sitemap-links" id="sitemapGlobal"></div>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ══════════════
+       PAGE: SETTINGS
+  ══════════════ -->
+  <div class="page" id="page-settings">
+    <div class="page-hd">
+      <div class="page-hd-title">Settings</div>
+    </div>
+
+    <!-- Saved cities -->
+    <div class="card mb14">
+      <div class="row-between">
+        <div class="sec-head" style="margin:0">Saved Cities</div>
+        <button class="chip" onclick="nav('home')">+ Add city</button>
+      </div>
+      <div id="savedCities"></div>
+    </div>
+
+    <!-- Preferences -->
+    <div class="card mb14">
+      <div class="sec-head" style="margin-bottom:14px">Preferences</div>
+      <div class="toggle-row">
+        <div><div class="toggle-title">Push Notifications</div><div class="toggle-sub">Severe weather alerts and daily summary</div></div>
+        <label class="toggle"><input type="checkbox" checked><span class="toggle-track"></span></label>
+      </div>
+      <div class="toggle-row">
+        <div><div class="toggle-title">Dynamic Atmosphere</div><div class="toggle-sub">Change background gradient with weather</div></div>
+        <label class="toggle"><input type="checkbox" checked id="bgToggle" onchange="toggleDynBg(this.checked)"><span class="toggle-track"></span></label>
+      </div>
+      <div class="toggle-row">
+        <div><div class="toggle-title">24-Hour Clock</div><div class="toggle-sub">Display times in 24h format</div></div>
+        <label class="toggle"><input type="checkbox" id="clockToggle"><span class="toggle-track"></span></label>
+      </div>
+      <div class="toggle-row">
+        <div><div class="toggle-title">Rain Animation</div><div class="toggle-sub">Particle effects during rainy weather</div></div>
+        <label class="toggle"><input type="checkbox" checked id="rainToggle" onchange="toggleRain(this.checked)"><span class="toggle-track"></span></label>
+      </div>
+      <div class="toggle-row">
+        <div><div class="toggle-title">Auto-Detect Location</div><div class="toggle-sub">Update weather on app open</div></div>
+        <label class="toggle"><input type="checkbox" checked><span class="toggle-track"></span></label>
+      </div>
+    </div>
+
+    <!-- API Key -->
+    <div class="card mb14">
+      <div class="sec-head" style="margin-bottom:12px">API Configuration</div>
+      <div style="font-size:0.76rem;color:var(--text-3);margin-bottom:7px">OpenWeatherMap API Key</div>
+      <input class="api-input" type="text" id="apiKeyInput"
+        placeholder="Enter your OWM API key…"
+        oninput="saveApiKey(this.value)">
+      <div style="font-size:0.72rem;color:var(--text-3);margin-top:8px;line-height:1.6">
+        Get a free key at <a href="https://openweathermap.org/api" target="_blank" style="color:var(--accent)">openweathermap.org</a>. Uses One Call API 3.0 for all weather data.
+      </div>
+    </div>
+
+    <!-- About -->
+    <div class="card">
+      <div class="sec-head">About Weather Forecast Nepal</div>
+      <div style="font-size:0.82rem;color:var(--text-2);line-height:1.8;margin-top:10px">
+        <b>Version</b> 2.0.0<br>
+        <b>Framework</b> Next.js 14 (App Router) · SSG + ISR<br>
+        <b>Data</b> OpenWeatherMap One Call API 3.0<br>
+        <b>SEO</b> City-level static pages · sitemap.xml · JSON-LD<br>
+        <b>Radar</b> OpenWeatherMap + Leaflet<br>
+        <b>Stack</b> Node.js · PostgreSQL · Redis · Vercel
+      </div>
+    </div>
+  </div>
+
+</div><!-- /shell -->
+
+<!-- ══ BOTTOM NAV ══ -->
+<nav class="bottom-nav">
+  <ul class="bnav-list">
+    <li><button class="active" id="bn-home" onclick="nav('home')">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      <span>Home</span>
+    </button></li>
+    <li><button id="bn-hourly" onclick="nav('hourly')">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+      <span>Hourly</span>
+    </button></li>
+    <li><button id="bn-daily" onclick="nav('daily')">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><line x1="16" x2="16" y1="2" y2="6"/><line x1="8" x2="8" y1="2" y2="6"/><line x1="3" x2="21" y1="10" y2="10"/></svg>
+      <span>Daily</span>
+    </button></li>
+    <li><button id="bn-radar" onclick="nav('radar')">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5.07 12.06A7.17 7.17 0 0 1 19 12"/><path d="M2 12a10 10 0 0 1 20 0"/><path d="M12 12v.01"/><circle cx="12" cy="12" r="1"/></svg>
+      <span>Radar</span>
+    </button></li>
+    <li><button id="bn-cities" onclick="nav('cities')">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" x2="22" y1="12" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+      <span>Cities</span>
+    </button></li>
+    <li><button id="bn-settings" onclick="nav('settings')">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>
+      <span>Settings</span>
+    </button></li>
+  </ul>
+</nav>
+
+
+<!-- ══════════════
+     JAVASCRIPT
+══════════════ -->
+<script>
+/* ── CONFIG ── */
+let OWM_KEY = localStorage.getItem('owmKey') || '';
+let unit = 'C';
+let dynBg = true;
+let rainFx = true;
+let currentCity = 'Kathmandu';
+let currentLat = 27.7172, currentLon = 85.3240;
+let wxData = null;
+let dailyRange = 10;
+let charts = {};
+const DAYS = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+
+/* ── CITY DATABASE ── */
+const NEPAL_CITIES = [
+  {name:'Kathmandu',country:'Nepal',slug:'kathmandu',lat:27.7172,lon:85.3240},
+  {name:'Pokhara',country:'Nepal',slug:'pokhara',lat:28.2096,lon:83.9856},
+  {name:'Bhaktapur',country:'Nepal',slug:'bhaktapur',lat:27.6719,lon:85.4298},
+  {name:'Lalitpur',country:'Nepal',slug:'lalitpur',lat:27.6644,lon:85.3188},
+  {name:'Chitwan',country:'Nepal',slug:'chitwan',lat:27.5291,lon:84.3542},
+  {name:'Biratnagar',country:'Nepal',slug:'biratnagar',lat:26.4525,lon:87.2718},
+  {name:'Butwal',country:'Nepal',slug:'butwal',lat:27.7006,lon:83.4486},
+  {name:'Dhangadhi',country:'Nepal',slug:'dhangadhi',lat:28.6956,lon:80.5997},
+  {name:'Birgunj',country:'Nepal',slug:'birgunj',lat:27.0111,lon:84.8779},
+  {name:'Hetauda',country:'Nepal',slug:'hetauda',lat:27.4207,lon:85.0340},
+  {name:'Janakpur',country:'Nepal',slug:'janakpur',lat:26.7288,lon:85.9244},
+  {name:'Lumbini',country:'Nepal',slug:'lumbini',lat:27.4833,lon:83.2760},
+  {name:'Manang',country:'Nepal',slug:'manang',lat:28.6716,lon:84.0161},
+  {name:'Lukla',country:'Nepal',slug:'lukla',lat:27.6869,lon:86.7294},
+  {name:'Namche Bazaar',country:'Nepal',slug:'namche-bazaar',lat:27.8069,lon:86.7139},
+];
+const INTL_CITIES = [
+  {name:'New Delhi',country:'India',slug:'new-delhi',lat:28.6139,lon:77.2090},
+  {name:'Mumbai',country:'India',slug:'mumbai',lat:19.0760,lon:72.8777},
+  {name:'Kolkata',country:'India',slug:'kolkata',lat:22.5726,lon:88.3639},
+  {name:'Dhaka',country:'Bangladesh',slug:'dhaka',lat:23.8103,lon:90.4125},
+  {name:'Lhasa',country:'China',slug:'lhasa',lat:29.6500,lon:91.1000},
+  {name:'Tokyo',country:'Japan',slug:'tokyo',lat:35.6762,lon:139.6503},
+  {name:'London',country:'UK',slug:'london',lat:51.5074,lon:-0.1278},
+  {name:'Paris',country:'France',slug:'paris',lat:48.8566,lon:2.3522},
+  {name:'New York',country:'USA',slug:'new-york',lat:40.7128,lon:-74.0060},
+  {name:'Dubai',country:'UAE',slug:'dubai',lat:25.2048,lon:55.2708},
+  {name:'Singapore',country:'Singapore',slug:'singapore',lat:1.3521,lon:103.8198},
+  {name:'Sydney',country:'Australia',slug:'sydney',lat:-33.8688,lon:151.2093},
+];
+const ALL_CITY_NAMES = [...NEPAL_CITIES, ...INTL_CITIES].map(c=>c.name+', '+c.country);
+
+/* ── SEO UPDATER ── */
+function updateSEO(city, slug) {
+  const baseUrl = 'https://weatherforecastnepal.com';
+  const url = `${baseUrl}/weather/${slug}`;
+  document.getElementById('pageTitle').textContent = `${city} Weather Forecast Today — Weather Forecast Nepal`;
+  document.getElementById('pageDesc').setAttribute('content',
+    `Accurate ${city} weather forecast, hourly weather, rain probability, temperature and air quality. Updated every hour.`);
+  document.getElementById('canonicalLink').setAttribute('href', url);
+  document.getElementById('ogTitle').setAttribute('content', `${city} Weather Forecast — Weather Forecast Nepal`);
+  document.getElementById('ogDesc').setAttribute('content',
+    `Accurate ${city} weather forecast with hourly updates, rain probability, and air quality index.`);
+  document.getElementById('ogUrl').setAttribute('content', url);
+  document.getElementById('breadcrumbCity').textContent = city;
+  // JSON-LD
+  const ld = {
+    "@context":"https://schema.org",
+    "@type":"WebPage",
+    "name":`${city} Weather Forecast Today`,
+    "description":`Accurate ${city} weather forecast, hourly weather, rain probability, temperature and air quality.`,
+    "url": url,
+    "breadcrumb":{
+      "@type":"BreadcrumbList",
+      "itemListElement":[
+        {"@type":"ListItem","position":1,"name":"Home","item":baseUrl},
+        {"@type":"ListItem","position":2,"name":"Weather","item":`${baseUrl}/weather`},
+        {"@type":"ListItem","position":3,"name":city,"item":url}
+      ]
+    }
+  };
+  document.getElementById('structuredData').textContent = JSON.stringify(ld, null, 2);
+  history.replaceState({}, '', `/weather/${slug}`);
+}
+
+/* ── NAVIGATION ── */
+const PAGES = ['home','hourly','daily','radar','alerts','cities','settings'];
+function nav(page) {
+  PAGES.forEach(p => {
+    document.getElementById('page-'+p).classList.remove('active');
+    const nl = document.getElementById('nl-'+p);
+    const bn = document.getElementById('bn-'+p);
+    if (nl) nl.classList.remove('active');
+    if (bn) bn.classList.remove('active');
+  });
+  document.getElementById('page-'+page).classList.add('active');
+  const nl = document.getElementById('nl-'+page);
+  const bn = document.getElementById('bn-'+page);
+  if (nl) nl.classList.add('active');
+  if (bn) bn.classList.add('active');
+  setTimeout(() => {
+    if (page === 'hourly') initHourlyCharts();
+    if (page === 'daily')  initDailyChart();
+  }, 50);
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+/* ── MOBILE DRAWER ── */
+function openDrawer() {
+  document.getElementById('mobileDrawer').classList.add('open');
+  document.getElementById('hamburger').classList.add('open');
+}
+function closeDrawer() {
+  document.getElementById('mobileDrawer').classList.remove('open');
+  document.getElementById('hamburger').classList.remove('open');
+}
+
+/* ── TIME ── */
+function updateTime() {
+  const now = new Date();
+  const t = now.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'});
+  const d = now.toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric'});
+  document.getElementById('heroTime').textContent = `${d} · ${t} NPT`;
+}
+setInterval(updateTime, 60000);
+updateTime();
+
+/* ── UNIT ── */
+function setUnit(u) {
+  unit = u;
+  document.getElementById('btnC').classList.toggle('active', u==='C');
+  document.getElementById('btnF').classList.toggle('active', u==='F');
+  if (wxData) renderData(wxData);
+}
+function toC(c) { return unit === 'F' ? Math.round(c*9/5+32) : Math.round(c); }
+function fmtT(c) { return toC(c) + '°'; }
+
+/* ── API KEY ── */
+function saveApiKey(k) {
+  OWM_KEY = k.trim();
+  localStorage.setItem('owmKey', OWM_KEY);
+}
+
+/* ── SEARCH ── */
+function handleSearch(q) {
+  const dd = document.getElementById('searchDrop');
+  if (!q || q.length < 2) { dd.classList.remove('open'); return; }
+  const matches = ALL_CITY_NAMES.filter(c => c.toLowerCase().includes(q.toLowerCase())).slice(0,6);
+  if (!matches.length) { dd.classList.remove('open'); return; }
+  dd.innerHTML = matches.map(c => `
+    <div class="search-item" onclick="fetchWeather('${c}')">
+      <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
+      ${c}
+    </div>`).join('');
+  dd.classList.add('open');
+}
+document.addEventListener('click', e => {
+  if (!e.target.closest('.search-zone'))
+    document.getElementById('searchDrop').classList.remove('open');
+});
+
+/* ── LOCATION ── */
+function detectLocation() {
+  if (!navigator.geolocation) { toast('GPS unavailable','Your browser does not support geolocation'); return; }
+  toast('Detecting…','Getting your GPS coordinates');
+  navigator.geolocation.getCurrentPosition(
+    p => { currentLat=p.coords.latitude; currentLon=p.coords.longitude; fetchWeatherByCoords(currentLat,currentLon); },
+    e => toast('Location error', e.message)
+  );
+}
+
+/* ── FETCH ── */
+async function fetchWeather(city) {
+  document.getElementById('searchDrop').classList.remove('open');
+  document.getElementById('searchInput').value = '';
+  if (!city) return;
+  toast('Loading…', `Fetching weather for ${city}`);
+  // Find slug
+  const found = [...NEPAL_CITIES, ...INTL_CITIES].find(c =>
+    city.toLowerCase().includes(c.name.toLowerCase()));
+  if (!OWM_KEY) {
+    currentCity = city.split(',')[0].trim();
+    if (found) { currentLat=found.lat; currentLon=found.lon; }
+    loadMock(currentCity);
+    updateSEO(currentCity, found ? found.slug : currentCity.toLowerCase().replace(/\s+/g,'-'));
+    return;
+  }
+  try {
+    const geoRes = await fetch(`https://api.openweathermap.org/geo/1.0/direct?q=${encodeURIComponent(city)}&limit=1&appid=${OWM_KEY}`);
+    const geo = await geoRes.json();
+    if (!geo.length) { toast('Not found', `Could not find "${city}"`); return; }
+    const {lat,lon,name,country} = geo[0];
+    currentLat=lat; currentLon=lon;
+    currentCity = name;
+    const slug = name.toLowerCase().replace(/\s+/g,'-');
+    updateSEO(name, slug);
+    await fetchWeatherByCoords(lat, lon);
+  } catch {
+    loadMock(city.split(',')[0]);
+  }
+}
+
+async function fetchWeatherByCoords(lat, lon) {
+  if (!OWM_KEY) { loadMock(currentCity); return; }
+  try {
+    const res = await fetch(
+      `https://api.openweathermap.org/data/3.0/onecall?lat=${lat}&lon=${lon}&units=metric&appid=${OWM_KEY}`
+    );
+    const data = await res.json();
+    if (data.cod && data.cod !== 200) { toast('API Error', data.message); loadMock(currentCity); return; }
+    wxData = data;
+    renderData(data);
+    toast('Updated', `Weather loaded for ${currentCity}`);
+  } catch { loadMock(currentCity); }
+}
+
+/* ── MOCK DATA ── */
+function loadMock(city) {
+  currentCity = city || 'Kathmandu';
+  const m = genMock();
+  wxData = m;
+  renderData(m);
+}
+
+function genMock() {
+  const base = 22 + Math.random()*7;
+  const hours = Array.from({length:48},(_,i)=>{
+    const t = new Date(); t.setHours(t.getHours()+i);
+    const st = Math.sin((t.getHours()-6)*Math.PI/12);
+    const temp = base + st*5 + (Math.random()-.5)*1.5;
+    return {dt:t.getTime()/1000,temp,feels_like:temp+2,humidity:58+Math.random()*25,
+      wind_speed:7+Math.random()*12,wind_deg:Math.floor(Math.random()*360),
+      pop:Math.random()*0.7,weather:[{id:800+Math.floor(Math.random()*4),main:'Clouds',
+      description:'partly cloudy',icon:'02d'}]};
+  });
+  const conds = ['Clear','Clouds','Rain','Drizzle','Thunderstorm','Snow'];
+  const icns  = ['01d','02d','03d','10d','11d','13d'];
+  const days = Array.from({length:16},(_,d)=>{
+    const dt = new Date(); dt.setDate(dt.getDate()+d);
+    const ci = Math.floor(Math.random()*conds.length);
+    return {dt:dt.getTime()/1000,
+      temp:{day:base+Math.random()*4-2,max:base+4+Math.random()*2,min:base-6+Math.random()*2},
+      humidity:50+Math.floor(Math.random()*35),
+      wind_speed:7+Math.random()*12,pop:Math.random()*0.8,
+      summary:conds[ci],weather:[{id:ci===0?800:801,main:conds[ci],
+      description:conds[ci].toLowerCase(),icon:icns[ci]}]};
+  });
+  return {
+    current:{temp:base+2,feels_like:base+4,humidity:68,pressure:1013,
+      uvi:4.2,visibility:10000,wind_speed:14,wind_deg:315,dew_point:18,
+      weather:[{id:802,main:'Clouds',description:'partly cloudy',icon:'02d'}],
+      sunrise:new Date().setHours(5,18)/1000,sunset:new Date().setHours(18,49)/1000},
+    hourly:hours, daily:days
+  };
+}
+
+/* ── WEATHER ICON MAPPING (Lucide) ── */
+function wxIcon(code, size=28) {
+  const map = {
+    '01d':'<svg xmlns="http://www.w3.org/2000/svg" width="'+size+'" height="'+size+'" viewBox="0 0 24 24" fill="none" stroke="#fbbf24" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>',
+    '01n':'<svg xmlns="http://www.w3.org/2000/svg" width="'+size+'" height="'+size+'" viewBox="0 0 24 24" fill="none" stroke="#c7d2fe" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>',
+    '02d':'<svg xmlns="http://www.w3.org/2000/svg" width="'+size+'" height="'+size+'" viewBox="0 0 24 24" fill="none" stroke="#93c5fd" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z"/></svg>',
+    '02n':'<svg xmlns="http://www.w3.org/2000/svg" width="'+size+'" height="'+size+'" viewBox="0 0 24 24" fill="none" stroke="#93c5fd" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z"/></svg>',
+    '03d':'<svg xmlns="http://www.w3.org/2000/svg" width="'+size+'" height="'+size+'" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z"/></svg>',
+    '03n':'<svg xmlns="http://www.w3.org/2000/svg" width="'+size+'" height="'+size+'" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z"/></svg>',
+    '09d':'<svg xmlns="http://www.w3.org/2000/svg" width="'+size+'" height="'+size+'" viewBox="0 0 24 24" fill="none" stroke="#60a5fa" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 16.2A4.5 4.5 0 0 0 17.5 8h-1.8A7 7 0 1 0 4 14.9"/><path d="M16 14v6M8 14v6M12 16v6"/></svg>',
+    '10d':'<svg xmlns="http://www.w3.org/2000/svg" width="'+size+'" height="'+size+'" viewBox="0 0 24 24" fill="none" stroke="#60a5fa" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 16.2A4.5 4.5 0 0 0 17.5 8h-1.8A7 7 0 1 0 4 14.9"/><path d="M16 14v6M8 14v6M12 16v6"/></svg>',
+    '11d':'<svg xmlns="http://www.w3.org/2000/svg" width="'+size+'" height="'+size+'" viewBox="0 0 24 24" fill="none" stroke="#a78bfa" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M19 16.9A5 5 0 0 0 18 7h-1.26a8 8 0 1 0-11.62 9"/><polyline points="13 11 9 17 15 17 11 23"/></svg>',
+    '13d':'<svg xmlns="http://www.w3.org/2000/svg" width="'+size+'" height="'+size+'" viewBox="0 0 24 24" fill="none" stroke="#bfdbfe" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 17.58A5 5 0 0 0 18 8h-1.26A8 8 0 1 0 4 16.25"/><polyline points="8 16 12 12 16 16"/><line x1="12" y1="12" x2="12" y2="20"/></svg>',
+    '50d':'<svg xmlns="http://www.w3.org/2000/svg" width="'+size+'" height="'+size+'" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="8" x2="21" y2="8"/><line x1="3" y1="16" x2="21" y2="16"/></svg>'
+  };
+  const k = code || '02d';
+  return map[k] || map['02d'];
+}
+
+/* ── WEATHER THEMES ── */
+const WX_THEMES = {
+  800:'wx-clear',801:'wx-clear',802:'wx-cloudy',803:'wx-cloudy',804:'wx-cloudy',
+  500:'wx-rain',501:'wx-rain',502:'wx-rain',503:'wx-rain',
+  300:'wx-rain',301:'wx-rain',200:'wx-storm',201:'wx-storm',210:'wx-storm',
+  600:'wx-snow',601:'wx-snow',602:'wx-snow',741:'wx-fog',701:'wx-fog'
+};
+function applyTheme(id) {
+  if (!dynBg) return;
+  const cls = WX_THEMES[id] || 'wx-clear';
+  document.body.className = cls;
+  if ((cls === 'wx-rain' || cls === 'wx-storm') && rainFx) genRain();
+  else document.getElementById('rainWrap').innerHTML = '';
+}
+
+function genRain() {
+  const w = document.getElementById('rainWrap');
+  w.innerHTML = '';
+  for (let i=0;i<70;i++) {
+    const d = document.createElement('div');
+    d.className = 'raindrop';
+    d.style.cssText=`left:${Math.random()*100}%;height:${10+Math.random()*18}px;animation-duration:${0.55+Math.random()*0.5}s;animation-delay:${-Math.random()*2}s;opacity:${0.35+Math.random()*0.45}`;
+    w.appendChild(d);
+  }
+}
+
+function toggleDynBg(on) {
+  dynBg = on;
+  if (!on) document.body.className = '';
+  else if (wxData) applyTheme(wxData.current.weather[0].id);
+}
+function toggleRain(on) {
+  rainFx = on;
+  if (!on) document.getElementById('rainWrap').innerHTML = '';
+  else if (wxData) applyTheme(wxData.current.weather[0].id);
+}
+
+/* ── RENDER DATA ── */
+function renderData(d) {
+  if (!d) return;
+  const c = d.current;
+  // Hero
+  document.getElementById('heroCity').textContent = currentCity;
+  document.getElementById('heroTemp').textContent = fmtT(c.temp);
+  document.getElementById('heroCond').textContent = cap(c.weather[0].description||'');
+  document.getElementById('heroFeels').textContent = fmtT(c.feels_like);
+  document.getElementById('heroHigh').textContent = fmtT(d.daily[0].temp.max);
+  document.getElementById('heroLow').textContent = fmtT(d.daily[0].temp.min);
+  // Hero icon
+  document.getElementById('heroIconWrap').innerHTML = wxIcon(c.weather[0].icon, 80);
+  // Stats
+  document.getElementById('qsHumidity').textContent = (c.humidity||0)+'%';
+  document.getElementById('qsWind').textContent = Math.round((c.wind_speed||0)*3.6||c.wind_speed)+' km/h';
+  document.getElementById('qsUV').textContent = Math.round(c.uvi||0);
+  document.getElementById('qsVis').textContent = Math.round((c.visibility||10000)/1000)+' km';
+  document.getElementById('qsPres').textContent = c.pressure||1013;
+  document.getElementById('qsDew').textContent = fmtT(c.dew_point||18);
+  // Detail cards
+  document.getElementById('dTemp').textContent = fmtT(c.temp);
+  document.getElementById('dFeels').textContent = 'Feels '+fmtT(c.feels_like);
+  document.getElementById('dHum').textContent = (c.humidity||0)+'%';
+  document.getElementById('dWind').textContent = Math.round((c.wind_speed||0)*3.6||c.wind_speed)+' km/h';
+  document.getElementById('dWindDir').textContent = degDir(c.wind_deg||0);
+  document.getElementById('dPres').textContent = c.pressure||1013;
+  document.getElementById('dUV').textContent = Math.round(c.uvi||0);
+  document.getElementById('dUVL').textContent = uvLabel(c.uvi||0);
+  document.getElementById('dVis').textContent = Math.round((c.visibility||10000)/1000)+' km';
+  document.getElementById('dDew').textContent = fmtT(c.dew_point||18);
+  // Sunrise/Sunset
+  const sr = new Date(c.sunrise*1000).toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'});
+  const ss = new Date(c.sunset*1000).toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'});
+  document.getElementById('sunriseTime').textContent = sr;
+  document.getElementById('sunsetTime').textContent = ss;
+  const dl = c.sunset - c.sunrise;
+  const h = Math.floor(dl/3600), m = Math.floor((dl%3600)/60);
+  document.getElementById('dayLen').textContent = `${h}h ${m}m`;
+  // Hourly scroll
+  renderHourlyScroll(d.hourly.slice(0,24));
+  // Daily home
+  renderDailyList(d.daily.slice(0,7), 'dailyHome');
+  // Theme
+  applyTheme(c.weather[0].id);
+  // Charts
+  renderHomeCharts(d.hourly.slice(0,24));
+  // Hourly subtitle
+  document.getElementById('hourlySubtitle').textContent = `${currentCity} · Updated just now`;
+}
+
+function renderHourlyScroll(hours) {
+  const el = document.getElementById('hourlyScroll');
+  el.innerHTML = hours.map((h,i) => {
+    const t = new Date(h.dt*1000);
+    const tStr = i===0 ? 'Now' : t.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'});
+    return `<div class="hr-item${i===0?' active':''}">
+      <div class="hr-time">${tStr}</div>
+      <div class="hr-icon">${wxIcon(h.weather[0].icon, 20)}</div>
+      <div class="hr-temp">${fmtT(h.temp)}</div>
+      <div class="hr-rain">${Math.round((h.pop||0)*100)}%</div>
+    </div>`;
+  }).join('');
+}
+
+function renderDailyList(days, targetId) {
+  const el = document.getElementById(targetId);
+  if (!el) return;
+  el.innerHTML = days.map((d,i) => {
+    const dt = new Date(d.dt*1000);
+    const dayStr = i===0?'Today':i===1?'Tomorrow':DAYS[dt.getDay()]+' '+dt.getDate();
+    return `<div class="day-row">
+      <div class="day-name">${dayStr}</div>
+      <div class="day-icon">${wxIcon(d.weather[0].icon, 20)}</div>
+      <div class="day-desc">${cap(d.weather[0].description||d.summary||'')}</div>
+      <div class="day-temps">
+        <span>${fmtT(d.temp.max)}</span>
+        <span class="day-lo">${fmtT(d.temp.min)}</span>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+/* ── HOME CHARTS ── */
+const CHART_OPTS = {
+  responsive: true, maintainAspectRatio: false,
+  animation: { duration: 600 },
+  plugins: { legend: { display: false }, tooltip: {
+    backgroundColor: 'rgba(15,25,35,0.92)',
+    borderColor: 'rgba(255,255,255,0.1)', borderWidth: 1,
+    titleColor: '#fff', bodyColor: 'rgba(255,255,255,0.7)',
+    padding: 10, cornerRadius: 8
+  }},
+  scales: {
+    x: { grid: { color:'rgba(255,255,255,0.05)' }, ticks: { color:'rgba(255,255,255,0.4)', font:{size:10} } },
+    y: { grid: { color:'rgba(255,255,255,0.05)' }, ticks: { color:'rgba(255,255,255,0.4)', font:{size:10} } }
+  }
+};
+
+function killChart(id) {
+  if (charts[id]) { charts[id].destroy(); delete charts[id]; }
+}
+
+function renderHomeCharts(hours) {
+  const labels = hours.map((h,i) => {
+    if (i%3!==0 && i!==0) return '';
+    const t = new Date(h.dt*1000);
+    return i===0?'Now':t.toLocaleTimeString('en-US',{hour:'2-digit',hour12:true}).replace(' ','');
+  });
+  const temps = hours.map(h => toC(h.temp));
+  const rain  = hours.map(h => Math.round((h.pop||0)*100));
+
+  killChart('tempChart');
+  charts['tempChart'] = new Chart(document.getElementById('tempChart'), {
+    type:'line',
+    data:{labels,datasets:[{
+      label:'Temp',data:temps,
+      borderColor:'#4a90d9',backgroundColor:'rgba(74,144,217,0.08)',
+      borderWidth:2,tension:0.4,fill:true,
+      pointRadius:2,pointBackgroundColor:'#4a90d9'
+    }]},
+    options: CHART_OPTS
+  });
+
+  killChart('rainChart');
+  charts['rainChart'] = new Chart(document.getElementById('rainChart'), {
+    type:'bar',
+    data:{labels,datasets:[{
+      label:'Rain %',data:rain,
+      backgroundColor:'rgba(74,144,217,0.35)',
+      borderColor:'rgba(74,144,217,0.7)',
+      borderWidth:1,borderRadius:4
+    }]},
+    options: {...CHART_OPTS, scales:{...CHART_OPTS.scales, y:{...CHART_OPTS.scales.y, max:100}}}
+  });
+}
+
+/* ── HOURLY PAGE CHARTS ── */
+function initHourlyCharts() {
+  if (!wxData) return;
+  const hours = wxData.hourly.slice(0,24);
+  const labels = hours.map((h,i) => {
+    const t = new Date(h.dt*1000);
+    return i===0?'Now':t.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'});
+  });
+  const temps = hours.map(h => toC(h.temp));
+  const rain  = hours.map(h => Math.round((h.pop||0)*100));
+  const wind  = hours.map(h => Math.round((h.wind_speed||0)*3.6||h.wind_speed));
+
+  killChart('hrTempChart');
+  charts['hrTempChart'] = new Chart(document.getElementById('hrTempChart'), {
+    type:'line',
+    data:{labels,datasets:[{label:'Temp',data:temps,
+      borderColor:'#4a90d9',backgroundColor:'rgba(74,144,217,0.08)',
+      borderWidth:2,tension:0.4,fill:true,pointRadius:3,pointBackgroundColor:'#4a90d9'}]},
+    options: CHART_OPTS
+  });
+
+  killChart('hrRainChart');
+  charts['hrRainChart'] = new Chart(document.getElementById('hrRainChart'), {
+    type:'bar',
+    data:{labels,datasets:[{label:'Rain %',data:rain,
+      backgroundColor:'rgba(74,144,217,0.35)',borderColor:'rgba(74,144,217,0.7)',
+      borderWidth:1,borderRadius:4}]},
+    options: {...CHART_OPTS,scales:{...CHART_OPTS.scales,y:{...CHART_OPTS.scales.y,max:100}}}
+  });
+
+  killChart('hrWindChart');
+  charts['hrWindChart'] = new Chart(document.getElementById('hrWindChart'), {
+    type:'line',
+    data:{labels,datasets:[{label:'Wind km/h',data:wind,
+      borderColor:'#93c5fd',backgroundColor:'rgba(147,197,253,0.08)',
+      borderWidth:2,tension:0.4,fill:true,pointRadius:2,pointBackgroundColor:'#93c5fd'}]},
+    options: CHART_OPTS
+  });
+
+  const list = document.getElementById('hrDetailList');
+  list.innerHTML = hours.map((h,i) => {
+    const t = new Date(h.dt*1000);
+    const tStr = i===0?'Now':t.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'});
+    return `<div class="wind-row">
+      <div style="width:54px;font-size:0.78rem;color:var(--text-3)">${tStr}</div>
+      <div style="width:22px">${wxIcon(h.weather[0].icon,20)}</div>
+      <div style="flex:1">
+        <div style="font-weight:600;font-size:0.87rem">${fmtT(h.temp)} · ${cap(h.weather[0].description||'')}</div>
+        <div style="font-size:0.7rem;color:var(--text-3);margin-top:2px">
+          Humidity ${h.humidity||0}% · Wind ${Math.round((h.wind_speed||0)*3.6)} km/h · Rain ${Math.round((h.pop||0)*100)}%
+        </div>
+      </div>
+      <div class="wind-compass" style="transform:rotate(${h.wind_deg||0}deg)">↑</div>
+    </div>`;
+  }).join('');
+}
+
+/* ── DAILY CHART ── */
+function initDailyChart() {
+  if (!wxData) return;
+  const days = wxData.daily.slice(0, dailyRange);
+  const labels = days.map((d,i) => {
+    if(i===0) return 'Today';
+    const dt = new Date(d.dt*1000);
+    return DAYS[dt.getDay()]+' '+dt.getDate();
+  });
+  killChart('dailyChart');
+  charts['dailyChart'] = new Chart(document.getElementById('dailyChart'), {
+    type:'line',
+    data:{labels,datasets:[
+      {label:'High',data:days.map(d=>toC(d.temp.max)),
+        borderColor:'#f59e0b',backgroundColor:'rgba(245,158,11,0.08)',
+        borderWidth:2.5,tension:0.4,fill:false,pointRadius:5,pointBackgroundColor:'#f59e0b'},
+      {label:'Low',data:days.map(d=>toC(d.temp.min)),
+        borderColor:'#60a5fa',backgroundColor:'rgba(96,165,250,0.08)',
+        borderWidth:2.5,tension:0.4,fill:false,pointRadius:5,pointBackgroundColor:'#60a5fa'}
+    ]},
+    options:{...CHART_OPTS,plugins:{...CHART_OPTS.plugins,
+      legend:{display:true,labels:{color:'rgba(255,255,255,0.55)',usePointStyle:true,font:{size:11}}}}}
+  });
+  renderDailyList(wxData.daily.slice(0, dailyRange), 'dailyFull');
+}
+
+function setDailyRange(n, btn) {
+  dailyRange = n;
+  document.querySelectorAll('.unit-pill .unit-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  initDailyChart();
+}
+
+/* ── AQI ── */
+function setAQI(aqi) {
+  document.getElementById('aqiNum').textContent = aqi;
+  document.getElementById('dAQI').textContent = aqi;
+  const pct = Math.min(100, Math.round((aqi/500)*100));
+  document.getElementById('aqiNeedle').style.left = pct+'%';
+  let color='#4ade80', label='Good', desc='Air quality is good with little or no risk.';
+  if(aqi>50) { color='#facc15'; label='Moderate'; desc='Acceptable air quality; moderate concern for sensitive people.'; }
+  if(aqi>100){ color='#fb923c'; label='Unhealthy for Sensitive'; desc='Sensitive groups may experience health effects.'; }
+  if(aqi>150){ color='#f87171'; label='Unhealthy'; desc='Everyone may experience health effects.'; }
+  if(aqi>200){ color='#c084fc'; label='Very Unhealthy'; desc='Health alert — everyone may experience serious effects.'; }
+  if(aqi>300){ color='#7e0023'; label='Hazardous'; desc='Emergency conditions — entire population affected.'; }
+  document.getElementById('aqiRing').style.borderColor = color;
+  const lbl = document.getElementById('aqiLabel');
+  lbl.textContent = label; lbl.style.color = color;
+  document.getElementById('aqiDesc').textContent = desc;
+  document.getElementById('dAQIL').textContent = label;
+}
+
+/* ── CITY GRIDS ── */
+function renderCityGrids() {
+  const tempMocks = [28,26,27,25,32,30,29,31,24,33,35,27,8,10,12,24,18,32,22,38,30,18];
+  function cityCard(c, idx) {
+    const t = tempMocks[idx % tempMocks.length];
+    const icons_list = ['02d','01d','03d','10d','01n','02d'];
+    const conditions = ['Partly Cloudy','Sunny','Overcast','Light Rain','Clear','Cloudy'];
+    const ci = idx % 6;
+    return `<div class="city-card" onclick="fetchWeather('${c.name}, ${c.country}');nav('home')">
+      <div class="city-card-name">${c.name}</div>
+      <div class="city-card-country">${c.country}</div>
+      <div class="city-card-temp">${unit==='F'?Math.round(t*9/5+32):t}°</div>
+      <div class="city-card-cond">${wxIcon(icons_list[ci],14)} ${conditions[ci]}</div>
+    </div>`;
+  }
+  document.getElementById('nepalCityGrid').innerHTML =
+    NEPAL_CITIES.map((c,i) => cityCard(c, i)).join('');
+  document.getElementById('intlCityGrid').innerHTML =
+    INTL_CITIES.map((c,i) => cityCard(c, i+5)).join('');
+
+  // Sitemap
+  document.getElementById('sitemapNepal').innerHTML =
+    NEPAL_CITIES.map(c => `<a class="sitemap-link" href="/weather/${c.slug}"
+      onclick="fetchWeather('${c.name}');nav('home');return false">/weather/${c.slug}</a>`).join('');
+  document.getElementById('sitemapAsia').innerHTML =
+    INTL_CITIES.filter(c=>['India','Bangladesh','China','Japan'].includes(c.country))
+    .map(c => `<a class="sitemap-link" href="/weather/${c.slug}"
+      onclick="fetchWeather('${c.name}');nav('home');return false">/weather/${c.slug}</a>`).join('');
+  document.getElementById('sitemapGlobal').innerHTML =
+    INTL_CITIES.filter(c=>!['India','Bangladesh','China','Japan'].includes(c.country))
+    .map(c => `<a class="sitemap-link" href="/weather/${c.slug}"
+      onclick="fetchWeather('${c.name}');nav('home');return false">/weather/${c.slug}</a>`).join('');
+}
+
+/* ── SAVED CITIES ── */
+function renderSavedCities() {
+  const saved = [
+    {name:'Kathmandu, NP',temp:28,cond:'Partly Cloudy'},
+    {name:'Pokhara, NP',temp:26,cond:'Cloudy'},
+    {name:'Mumbai, IN',temp:34,cond:'Sunny'},
+    {name:'London, UK',temp:18,cond:'Rainy'},
+  ];
+  document.getElementById('savedCities').innerHTML = saved.map(c => `
+    <div class="saved-city" onclick="fetchWeather('${c.name}');nav('home')">
+      <div>
+        <div class="saved-city-name">${c.name}</div>
+        <div class="saved-city-meta">${c.cond}</div>
+      </div>
+      <div class="saved-city-temp">${unit==='F'?Math.round(c.temp*9/5+32):c.temp}°</div>
+    </div>`).join('');
+}
+
+/* ── TOAST ── */
+let toastTimer;
+function toast(title, msg) {
+  const el = document.getElementById('toast');
+  document.getElementById('toastTitle').textContent = title;
+  document.getElementById('toastMsg').textContent = msg;
+  el.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.classList.remove('show'), 3400);
+}
+
+/* ── HELPERS ── */
+function cap(s) { return s ? s.charAt(0).toUpperCase()+s.slice(1) : s; }
+function degDir(d) {
+  return ['N','NE','E','SE','S','SW','W','NW'][Math.round(d/45)%8];
+}
+function uvLabel(uv) {
+  if(uv<3) return 'Low';
+  if(uv<6) return 'Moderate';
+  if(uv<8) return 'High';
+  if(uv<11) return 'Very High';
+  return 'Extreme';
+}
+
+/* ── SITEMAP XML HELPER ── */
+// In a real Next.js app this would be generated via app/sitemap.ts
+// The URL structure is: /weather/[slug]
+const SITEMAP_XML = `<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="https://www.sitemaps.org/schemas/sitemap/0.9">
+  <url><loc>https://weatherforecastnepal.com/</loc><changefreq>hourly</changefreq><priority>1.0</priority></url>
+${[...NEPAL_CITIES,...INTL_CITIES].map(c =>
+  `  <url><loc>https://weatherforecastnepal.com/weather/${c.slug}</loc><changefreq>hourly</changefreq><priority>0.9</priority></url>`
+).join('\n')}
+</urlset>`;
+// Log so developer can copy it
+console.info('=== sitemap.xml ===\n' + SITEMAP_XML);
+
+/* ── INIT ── */
+document.addEventListener('DOMContentLoaded', () => {
+  const stored = localStorage.getItem('owmKey');
+  if (stored) {
+    OWM_KEY = stored;
+    document.getElementById('apiKeyInput').value = stored;
+  }
+  setAQI(52);
+  renderCityGrids();
+  renderSavedCities();
+  loadMock('Kathmandu');
+  updateSEO('Kathmandu', 'kathmandu');
+
+  // Auto-detect if already permitted
+  if (navigator.permissions) {
+    navigator.permissions.query({name:'geolocation'}).then(r => {
+      if (r.state==='granted' && OWM_KEY) detectLocation();
+    });
+  }
+
+  setTimeout(() => toast('Weather Forecast Nepal', 'Add your OpenWeatherMap API key in Settings for live data.'), 900);
+});
+</script>
+</body>
+</html>
